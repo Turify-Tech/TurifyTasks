@@ -41,6 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
 			
 			if (response.ok) {
 				// Login exitoso
+				console.log('✅ Login exitoso! Datos recibidos:', data);
+				
 				if (successMessage) {
 					successMessage.textContent = '¡Inicio de sesión exitoso! Redirigiendo...';
 					successMessage.style.display = 'block';
@@ -48,11 +50,21 @@ document.addEventListener('DOMContentLoaded', function() {
 				
 				// Guardar token si viene en la respuesta
 				if (data.token) {
+					console.log('🔑 Guardando token en localStorage...');
+					localStorage.clear(); // Limpiar localStorage primero
 					localStorage.setItem('authToken', data.token);
+					
+					// Verificar que se guardó correctamente
+					const savedToken = localStorage.getItem('authToken');
+					console.log('✓ Token guardado exitosamente:', savedToken ? 'SÍ' : 'NO');
+					console.log('🔍 Token completo guardado:', savedToken);
+				} else {
+					console.warn('⚠️ No se recibió token en la respuesta');
 				}
 				
 				// Redirigir después de 1 segundo
 				setTimeout(() => {
+					console.log('🔄 Redirigiendo al dashboard...');
 					window.location.href = '/dashboard';
 				}, 1000);
 			} else {
