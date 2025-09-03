@@ -1,5 +1,14 @@
 import { db } from "../db.js";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
+
+// Store de sesiones en memoria (en producción deberías usar Redis)
+export const sessionStore = new Map();
+
+// Generar token de sesión
+function generateSessionToken() {
+    return crypto.randomBytes(32).toString("hex");
+}
 
 // Controlador para registrar un nuevo usuario
 export const registerUser = async (req, res) => {
@@ -111,15 +120,25 @@ export const loginUser = async (req, res) => {
                 .json({ error: "Correo o contraseña incorrectos" });
         }
 
-        req.session.user = {
+        // Generar token de sesión
+        const sessionToken = generateSessionToken();
+        const userSession = {
             id: user.id,
             username: user.username,
             email: user.email,
+            createdAt: new Date(),
         };
+
+        // Guardar sesión en el store
+        sessionStore.set(sessionToken, userSession);
+
         console.log("Login exitoso para usuario:", user.email);
+        console.log("Token de sesión generado:", sessionToken);
+
         return res.json({
             message: "Inicio de sesión exitoso",
-            user: req.session.user,
+            user: userSession,
+            sessionToken: sessionToken,
         });
     } catch (error) {
         console.error("Error en login:", error);
@@ -129,21 +148,43 @@ export const loginUser = async (req, res) => {
 
 // Controlador para logout de usuario
 export const logoutUser = (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).json({ error: "No se pudo cerrar sesión" });
-        }
-        res.clearCookie("connect.sid");
+    const sessionToken = req.headers.authorization?.replace("Bearer ", "");
+
+    if (sessionToken && sessionStore.has(sessionToken)) {
+        sessionStore.delete(sessionToken);
         return res.json({ message: "Sesión cerrada correctamente" });
-    });
+    }
+
+    return res.json({ message: "Sesión cerrada correctamente" });
 };
 
 // Controlador para verificar el estado de autenticación
 export const checkAuth = (req, res) => {
-    if (req.session && req.session.user) {
+    const sessionToken = req.headers.authorization?.replace("Bearer ", "");
+
+    console.log("Verificando token:", sessionToken);
+    console.log("Tokens en store:", Array.from(sessionStore.keys()));
+
+    if (sessionToken && sessionStore.has(sessionToken)) {
+        const userSession = sessionStore.get(sessionToken);
+
+        // Verificar si la sesión no ha expirado (24 horas)
+        const now = new Date();
+        const sessionAge = now - userSession.createdAt;
+        const maxAge = 24 * 60 * 60 * 1000; // 24 horas
+
+        if (sessionAge > maxAge) {
+            sessionStore.delete(sessionToken);
+            return res.json({ authenticated: false });
+        }
+
         return res.json({
             authenticated: true,
-            user: req.session.user,
+            user: {
+                id: userSession.id,
+                username: userSession.username,
+                email: userSession.email,
+            },
         });
     } else {
         return res.json({

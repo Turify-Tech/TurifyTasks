@@ -37,15 +37,21 @@ export function buildApiUrl(endpoint) {
 // Función helper para hacer fetch con la configuración base
 export async function apiRequest(endpoint, options = {}) {
     const url = buildApiUrl(endpoint);
+
+    // Obtener token de sesión del localStorage
+    const sessionToken = localStorage.getItem("sessionToken");
+
     const defaultOptions = {
         credentials: "include",
         headers: {
             "Content-Type": "application/json",
+            ...(sessionToken && { Authorization: `Bearer ${sessionToken}` }),
             ...options.headers,
         },
     };
 
     console.log("[API Request] URL:", url);
+    console.log("[API Request] Token usado:", sessionToken ? "SÍ" : "NO");
     console.log("[API Request] Options:", { ...defaultOptions, ...options });
 
     return fetch(url, { ...defaultOptions, ...options });

@@ -132,16 +132,17 @@ export async function logout() {
 
         if (response.ok) {
             showToast("Sesión cerrada correctamente", "success");
-            // Limpiar datos del usuario
-            window.currentUser = null;
-            // Redirigir al login
-            window.location.href = "/login";
         } else {
-            throw new Error("Error al cerrar sesión");
+            showToast("Error al cerrar sesión", "error");
         }
     } catch (error) {
         console.error("Error en logout:", error);
         showToast("Error al cerrar sesión", "error");
+    } finally {
+        // Siempre limpiar datos locales independientemente del resultado del servidor
+        localStorage.removeItem("sessionToken");
+        window.currentUser = null;
+        window.location.href = "/login";
     }
 }
 
