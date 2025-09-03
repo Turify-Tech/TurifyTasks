@@ -5,6 +5,16 @@ import { apiRequest, API_CONFIG } from "../config/api.js";
 // Verificar si el usuario está autenticado
 export async function checkAuthStatus() {
     try {
+        // Cache de autenticación para evitar verificaciones excesivas
+        if (window.authCache && window.authCache.timestamp) {
+            const cacheAge = Date.now() - window.authCache.timestamp;
+            // Usar cache si es menor a 3 segundos
+            if (cacheAge < 3000) {
+                console.log("[Auth] Usando cache de autenticación");
+                return window.authCache.data;
+            }
+        }
+
         console.log("[Auth] === INICIO VERIFICACIÓN DE AUTENTICACIÓN ===");
         console.log("[Auth] API URL:", API_CONFIG.BASE_URL);
         console.log("[Auth] Endpoint:", API_CONFIG.ENDPOINTS.AUTH.CHECK);
@@ -20,12 +30,21 @@ export async function checkAuthStatus() {
             const errorText = await response.text();
             console.log("[Auth] Error del servidor:", errorText);
             console.log("[Auth] === FIN VERIFICACIÓN (ERROR) ===");
-            return { authenticated: false, error: errorText };
+            const result = { authenticated: false, error: errorText };
+
+            // Guardar en cache solo si no es un error de red
+            if (response.status !== 0) {
+                window.authCache = {
+                    data: result,
+                    timestamp: Date.now(),
+                };
+            }
+
+            return result;
         }
 
         const data = await response.json();
-        console.log("[Auth] Datos de autenticación:", {
-            authenticated: data.authenticated,
+        const result = Object.assign(data, {
             user: data.user
                 ? {
                       id: data.user.id,
@@ -34,8 +53,15 @@ export async function checkAuthStatus() {
                   }
                 : null,
         });
+
+        // Guardar resultado en cache
+        window.authCache = {
+            data: result,
+            timestamp: Date.now(),
+        };
+
         console.log("[Auth] === FIN VERIFICACIÓN (EXITOSA) ===");
-        return data;
+        return result;
     } catch (error) {
         console.error(
             "[Auth] Error al verificar autenticación:",
@@ -43,7 +69,10 @@ export async function checkAuthStatus() {
         );
         console.error("[Auth] Error completo:", error);
         console.log("[Auth] === FIN VERIFICACIÓN (EXCEPCIÓN) ===");
-        return { authenticated: false, error: error.message };
+        const result = { authenticated: false, error: error.message };
+
+        // No guardar errores de red en cache
+        return result;
     }
 }
 
@@ -142,6 +171,9 @@ export async function logout() {
         // Siempre limpiar datos locales independientemente del resultado del servidor
         localStorage.removeItem("sessionToken");
         window.currentUser = null;
+        // Limpiar cache de autenticación
+        window.authCache = null;
+        window.lastAuthCheck = 0;
         window.location.href = "/login";
     }
 }
@@ -151,9 +183,20 @@ export function initializeAuth() {
     // Resetear estado de redirección al cargar la página
     window.isRedirecting = false;
 
-    // Verificar autenticación cuando se carga la página
+    // Verificar autenticación cuando se carga la página (solo si no se ha verificado recientemente)
     document.addEventListener("DOMContentLoaded", async () => {
         console.log("[Auth] Inicializando verificación de autenticación...");
+
+        // Verificar si ya se verificó recientemente (últimos 5 segundos)
+        const lastCheck = window.lastAuthCheck || 0;
+        const now = Date.now();
+
+        if (now - lastCheck < 5000) {
+            console.log("[Auth] Verificación reciente detectada, saltando...");
+            return;
+        }
+
+        window.lastAuthCheck = now;
         await handleAuthRedirect();
     });
 }

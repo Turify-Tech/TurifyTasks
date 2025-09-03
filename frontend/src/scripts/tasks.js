@@ -197,7 +197,11 @@ export async function loadTasks() {
 
         if (!response.ok) {
             if (response.status === 401) {
-                console.error("[loadTasks] No autenticado, redirigiendo...");
+                console.error(
+                    "[loadTasks] No autenticado, limpiando cache y redirigiendo..."
+                );
+                // Limpiar cache de autenticación cuando recibimos 401
+                window.authCache = null;
                 window.location.href = "/login";
                 return;
             }

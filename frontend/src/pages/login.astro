@@ -169,6 +169,9 @@ const pageTitle = "Iniciar Sesión - TurifyTasks";
     initializeAuth();
 
     document.addEventListener("DOMContentLoaded", function () {
+        // Limpiar cache de autenticación al cargar login
+        window.authCache = null;
+        window.lastAuthCheck = 0;
         // Configurar toggle de contraseña
         const togglePassword = document.getElementById("togglePassword");
         if (togglePassword) {

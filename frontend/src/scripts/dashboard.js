@@ -1,6 +1,6 @@
 // dashboard.js - Inicialización y orquestación de dashboard
 console.log("[dashboard.js] cargado");
-import { initializeAuth } from "./authUtils.js";
+import { initializeAuth, checkAuthStatus } from "./authUtils.js";
 import { checkAuthentication, updateUserUI, logout } from "./auth.js";
 import {
     loadTasks,
@@ -86,15 +86,19 @@ window.closeTaskForm = function () {
 initializeAuth();
 
 // Inicialización
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
     console.log("[dashboard.js] DOM cargado, iniciando...");
 
     // Suscribirse a los stores ANTES de cargar datos
     setupStoreSubscriptions();
 
-    // Solo cargar tareas - la autenticación ya se maneja en initializeAuth()
-    console.log("[dashboard.js] Llamando a loadTasks...");
-    loadTasks();
+    // Verificar autenticación una sola vez antes de cargar tareas
+    const authStatus = await checkAuthentication();
+    if (authStatus) {
+        // Solo cargar tareas si la autenticación fue exitosa
+        console.log("[dashboard.js] Autenticación exitosa, cargando tareas...");
+        loadTasks();
+    }
 
     // Renderizado inicial por si las suscripciones no se ejecutan inmediatamente
     setTimeout(() => {
