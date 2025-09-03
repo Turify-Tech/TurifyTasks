@@ -4,9 +4,12 @@ import type { Task, User } from "../types";
 import TaskList from "../components/TaskList.astro";
 import TaskForm from "../components/TaskForm.astro";
 import TaskListsManager from "../components/TaskListsManager.astro";
+import MetaTags from "../components/MetaTags.astro";
 import "../styles/components/Dashboard.css";
 
 const pageTitle = "Dashboard - TurifyTasks";
+const pageDescription =
+    "Gestiona tus tareas y proyectos desde tu panel de control personalizado en TurifyTasks.";
 ---
 
 <html lang="es">
@@ -16,6 +19,15 @@ const pageTitle = "Dashboard - TurifyTasks";
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
         <title>{pageTitle}</title>
+
+        <MetaTags
+            title={pageTitle}
+            description={pageDescription}
+            url="https://turify-tasks.vercel.app/dashboard"
+            image="/og-image.svg"
+            type="website"
+            keywords="dashboard, panel de control, tareas, proyectos, gestión"
+        />
     </head>
     <body>
         <!-- Header -->

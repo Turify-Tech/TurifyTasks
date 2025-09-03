@@ -1,6 +1,10 @@
 ---
 // register.astro
+import MetaTags from "../components/MetaTags.astro";
+
 const pageTitle = "Registro - TurifyTasks";
+const pageDescription =
+    "Únete a TurifyTasks y gestiona tus tareas de manera eficiente. Crea tu cuenta gratis y organiza tus proyectos.";
 ---
 
 <html lang="es">
@@ -11,6 +15,14 @@ const pageTitle = "Registro - TurifyTasks";
         <meta name="generator" content={Astro.generator} />
         <title>{pageTitle}</title>
         <link rel="stylesheet" href="/src/styles/register.css" />
+
+        <MetaTags
+            title={pageTitle}
+            description={pageDescription}
+            url="https://turify-tasks.vercel.app/register"
+            image="/og-image.svg"
+            keywords="registro, crear cuenta, TurifyTasks, unirse, nueva cuenta"
+        />
     </head>
     <body>
         <div class="container">

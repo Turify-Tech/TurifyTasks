@@ -1,5 +1,9 @@
 ---
+import MetaTags from "../components/MetaTags.astro";
+
 const pageTitle = "TurifyTasks - Gestión de Tareas";
+const pageDescription =
+    "Gestiona tus tareas de manera eficiente con TurifyTasks. Organiza proyectos, colabora en equipo y aumenta tu productividad.";
 ---
 
 <html lang="es">
@@ -9,6 +13,14 @@ const pageTitle = "TurifyTasks - Gestión de Tareas";
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
         <title>{pageTitle}</title>
+
+        <MetaTags
+            title={pageTitle}
+            description={pageDescription}
+            url="https://turify-tasks.vercel.app"
+            image="/og-image.svg"
+            keywords="gestión de tareas, productividad, organizador, TurifyTasks, todo list, GTD"
+        />
     </head>
     <body> </body>
 </html>

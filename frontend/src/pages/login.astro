@@ -1,6 +1,10 @@
 ---
 // login.astro
+import MetaTags from "../components/MetaTags.astro";
+
 const pageTitle = "Iniciar Sesión - TurifyTasks";
+const pageDescription =
+    "Accede a tu cuenta en TurifyTasks para gestionar tus tareas y proyectos de manera eficiente.";
 ---
 
 <html lang="es">
@@ -11,6 +15,14 @@ const pageTitle = "Iniciar Sesión - TurifyTasks";
         <meta name="generator" content={Astro.generator} />
         <title>{pageTitle}</title>
         <link rel="stylesheet" href="/src/styles/login.css" />
+
+        <MetaTags
+            title={pageTitle}
+            description={pageDescription}
+            url="https://turify-tasks.vercel.app/login"
+            image="/og-image.svg"
+            keywords="login, iniciar sesión, TurifyTasks, acceso, cuenta"
+        />
     </head>
     <body>
         <div class="container">

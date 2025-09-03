@@ -1,0 +1,29 @@
+{
+    "name": "TurifyTasks",
+    "short_name": "TurifyTasks",
+    "description": "Gestión inteligente de tareas y proyectos",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#667eea",
+    "orientation": "portrait",
+    "categories": ["productivity", "business"],
+    "lang": "es",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/og-image.svg",
+            "sizes": "1200x630",
+            "type": "image/svg+xml",
+            "platform": "wide",
+            "label": "Dashboard de TurifyTasks"
+        }
+    ]
+}
