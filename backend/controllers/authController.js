@@ -160,35 +160,55 @@ export const logoutUser = (req, res) => {
 
 // Controlador para verificar el estado de autenticación
 export const checkAuth = (req, res) => {
-    const sessionToken = req.headers.authorization?.replace("Bearer ", "");
+    try {
+        const sessionToken = req.headers.authorization?.replace("Bearer ", "");
 
-    console.log("Verificando token:", sessionToken);
-    console.log("Tokens en store:", Array.from(sessionStore.keys()));
+        console.log("Verificando token:", sessionToken);
+        console.log("Tokens en store:", Array.from(sessionStore.keys()));
 
-    if (sessionToken && sessionStore.has(sessionToken)) {
-        const userSession = sessionStore.get(sessionToken);
+        // Siempre enviar headers apropiados
+        res.setHeader("Content-Type", "application/json");
 
-        // Verificar si la sesión no ha expirado (24 horas)
-        const now = new Date();
-        const sessionAge = now - userSession.createdAt;
-        const maxAge = 24 * 60 * 60 * 1000; // 24 horas
+        if (sessionToken && sessionStore.has(sessionToken)) {
+            const userSession = sessionStore.get(sessionToken);
 
-        if (sessionAge > maxAge) {
-            sessionStore.delete(sessionToken);
-            return res.json({ authenticated: false });
+            // Verificar si la sesión no ha expirado (24 horas)
+            const now = new Date();
+            const sessionAge = now - userSession.createdAt;
+            const maxAge = 24 * 60 * 60 * 1000; // 24 horas
+
+            if (sessionAge > maxAge) {
+                sessionStore.delete(sessionToken);
+                console.log("Sesión expirada, devolviendo no autenticado");
+                return res.status(200).json({
+                    authenticated: false,
+                    reason: "session_expired",
+                });
+            }
+
+            console.log("Sesión válida, devolviendo usuario autenticado");
+            return res.status(200).json({
+                authenticated: true,
+                user: {
+                    id: userSession.id,
+                    username: userSession.username,
+                    email: userSession.email,
+                },
+            });
+        } else {
+            console.log(
+                "No hay token o token inválido, devolviendo no autenticado"
+            );
+            return res.status(200).json({
+                authenticated: false,
+                reason: sessionToken ? "invalid_token" : "no_token",
+            });
         }
-
-        return res.json({
-            authenticated: true,
-            user: {
-                id: userSession.id,
-                username: userSession.username,
-                email: userSession.email,
-            },
-        });
-    } else {
-        return res.json({
+    } catch (error) {
+        console.error("Error en checkAuth:", error);
+        return res.status(200).json({
             authenticated: false,
+            error: "internal_error",
         });
     }
 };

@@ -1,7 +1,7 @@
 // Configuración centralizada de la API
 export const API_CONFIG = {
-    // Usar localhost en desarrollo y Vercel en producción
-    BASE_URL: "https://turify-tasks-backend.vercel.app",
+    // Usar localhost en desarrollo
+    BASE_URL: "http://localhost:3000",
 
     // Endpoints de la API
     ENDPOINTS: {
@@ -54,5 +54,56 @@ export async function apiRequest(endpoint, options = {}) {
     console.log("[API Request] Token usado:", sessionToken ? "SÍ" : "NO");
     console.log("[API Request] Options:", { ...defaultOptions, ...options });
 
-    return fetch(url, { ...defaultOptions, ...options });
+    // Implementar timeout de 10 segundos
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+        const response = await fetch(url, {
+            ...defaultOptions,
+            ...options,
+            signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        // Verificar que la respuesta tenga contenido
+        const contentLength = response.headers.get("content-length");
+        if (contentLength === "0" || contentLength === null) {
+            console.warn("[API Request] Respuesta vacía del servidor");
+            // Crear una respuesta por defecto para el endpoint de check
+            if (endpoint === "/api/auth/check") {
+                return new Response(
+                    JSON.stringify({
+                        authenticated: false,
+                        reason: "empty_response",
+                    }),
+                    {
+                        status: 200,
+                        headers: { "Content-Type": "application/json" },
+                    }
+                );
+            }
+        }
+
+        return response;
+    } catch (error) {
+        clearTimeout(timeoutId);
+
+        if (error.name === "AbortError") {
+            console.error("[API Request] Timeout en la petición");
+            // Para el endpoint de check, devolver respuesta por defecto en caso de timeout
+            if (endpoint === "/api/auth/check") {
+                return new Response(
+                    JSON.stringify({ authenticated: false, reason: "timeout" }),
+                    {
+                        status: 200,
+                        headers: { "Content-Type": "application/json" },
+                    }
+                );
+            }
+        }
+
+        throw error;
+    }
 }

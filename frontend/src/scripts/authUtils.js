@@ -27,7 +27,12 @@ export async function checkAuthStatus() {
         console.log("  - OK:", response.ok);
 
         if (!response.ok) {
-            const errorText = await response.text();
+            let errorText = "Unknown error";
+            try {
+                errorText = await response.text();
+            } catch (e) {
+                console.warn("[Auth] No se pudo leer el error del servidor");
+            }
             console.log("[Auth] Error del servidor:", errorText);
             console.log("[Auth] === FIN VERIFICACIÓN (ERROR) ===");
             const result = { authenticated: false, error: errorText };
@@ -43,7 +48,29 @@ export async function checkAuthStatus() {
             return result;
         }
 
-        const data = await response.json();
+        let data;
+        try {
+            const responseText = await response.text();
+            if (!responseText || responseText.trim() === "") {
+                console.warn(
+                    "[Auth] Respuesta vacía del servidor, asumiendo no autenticado"
+                );
+                const result = {
+                    authenticated: false,
+                    error: "empty_response",
+                };
+                window.authCache = {
+                    data: result,
+                    timestamp: Date.now(),
+                };
+                return result;
+            }
+            data = JSON.parse(responseText);
+        } catch (e) {
+            console.error("[Auth] Error parseando respuesta JSON:", e);
+            const result = { authenticated: false, error: "invalid_response" };
+            return result;
+        }
         const result = Object.assign(data, {
             user: data.user
                 ? {
