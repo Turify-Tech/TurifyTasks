@@ -1,7 +1,7 @@
 // Configuración centralizada de la API
 export const API_CONFIG = {
     // Usar localhost en desarrollo y Vercel en producción
-    BASE_URL: "https://turify-tasks-backend.vercel.app/",
+    BASE_URL: "https://turify-tasks-backend.vercel.app",
 
     // Endpoints de la API
     ENDPOINTS: {
