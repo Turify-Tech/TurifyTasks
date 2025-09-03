@@ -1,318 +1,337 @@
 ---
 // TaskList.astro - Componente que renderiza una lista de tareas
-import type { Task } from '../types';
-import TaskItem from './TaskItem.astro';
+import type { Task } from "../types";
+import TaskItem from "./TaskItem.astro";
+import "../styles/components/TaskList.css";
 
 interface Props {
-  tasks: Task[];
-  title?: string;
-  emptyMessage?: string;
-  showCompleted?: boolean;
-  maxItems?: number;
+    tasks: Task[];
+    title?: string;
+    emptyMessage?: string;
+    showCompleted?: boolean;
+    maxItems?: number;
 }
 
-const { 
-  tasks, 
-  title = "Tareas", 
-  emptyMessage = "No hay tareas para mostrar",
-  showCompleted = true,
-  maxItems
+const {
+    tasks,
+    title = "Tareas",
+    emptyMessage = "No hay tareas para mostrar",
+    showCompleted = true,
+    maxItems,
 } = Astro.props;
 
 // Filtrar tareas según configuración
 let filteredTasks = tasks;
 
 if (!showCompleted) {
-  filteredTasks = tasks.filter(task => !task.completed);
+    filteredTasks = tasks.filter((task) => !task.completed);
 }
 
 if (maxItems && maxItems > 0) {
-  filteredTasks = filteredTasks.slice(0, maxItems);
+    filteredTasks = filteredTasks.slice(0, maxItems);
 }
 
 // Estadísticas rápidas
 const totalTasks = tasks.length;
-const completedTasks = tasks.filter(task => task.completed).length;
+const completedTasks = tasks.filter((task) => task.completed).length;
 const pendingTasks = totalTasks - completedTasks;
 ---
 
 <div class="task-list">
-  <!-- Encabezado con título y estadísticas -->
-  <div class="task-list-header">
-    <div class="header-main">
-      <h2 class="list-title">{title}</h2>
-      {totalTasks > 0 && (
-        <div class="task-stats">
-          <span class="stat pending">{pendingTasks} pendientes</span>
-          <span class="stat-divider">•</span>
-          <span class="stat completed">{completedTasks} completadas</span>
+    <!-- Encabezado con título y estadísticas -->
+    <div class="task-list-header">
+        <div class="header-main">
+            <h2 class="list-title">{title}</h2>
+            {
+                totalTasks > 0 && (
+                    <div class="task-stats">
+                        <span class="stat pending">
+                            {pendingTasks} pendientes
+                        </span>
+                        <span class="stat-divider">•</span>
+                        <span class="stat completed">
+                            {completedTasks} completadas
+                        </span>
+                    </div>
+                )
+            }
         </div>
-      )}
+
+        {
+            maxItems && totalTasks > maxItems && (
+                <div class="view-all">
+                    <a href="#" class="view-all-link">
+                        Ver todas ({totalTasks})
+                    </a>
+                </div>
+            )
+        }
     </div>
-    
-    {maxItems && totalTasks > maxItems && (
-      <div class="view-all">
-        <a href="#" class="view-all-link">Ver todas ({totalTasks})</a>
-      </div>
-    )}
-  </div>
 
-  <!-- Lista de tareas -->
-  <div class="task-list-content">
-    {filteredTasks.length > 0 ? (
-      <div class="tasks-container" role="list" aria-label={`Lista de ${title.toLowerCase()}`}>
-        {filteredTasks.map((task) => (
-          <div role="listitem">
-            <TaskItem task={task} />
-          </div>
-        ))}
-      </div>
-    ) : (
-      <div class="empty-state">
-        <div class="empty-icon">📝</div>
-        <h3 class="empty-title">
-          {tasks.length === 0 ? emptyMessage : "No hay tareas que mostrar"}
-        </h3>
-        <p class="empty-description">
-          {tasks.length === 0 
-            ? "Crea tu primera tarea para comenzar a organizar tu trabajo"
-            : !showCompleted 
-              ? "Todas las tareas están completadas" 
-              : "No hay tareas que coincidan con los filtros actuales"
-          }
-        </p>
-        {tasks.length === 0 && (
-          <button 
-            class="create-task-btn" 
-            onclick="showCreateTaskModal()"
-            aria-label="Crear nueva tarea"
-          >
-            ➕ Nueva tarea
-          </button>
-        )}
-      </div>
-    )}
-  </div>
+    <!-- Lista de tareas -->
+    <div class="task-list-content">
+        {
+            filteredTasks.length > 0 ? (
+                <div
+                    class="tasks-container"
+                    role="list"
+                    aria-label={`Lista de ${title.toLowerCase()}`}>
+                    {filteredTasks.map((task) => (
+                        <div role="listitem">
+                            <TaskItem task={task} />
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div class="empty-state">
+                    <div class="empty-icon">📝</div>
+                    <h3 class="empty-title">
+                        {tasks.length === 0
+                            ? emptyMessage
+                            : "No hay tareas que mostrar"}
+                    </h3>
+                    <p class="empty-description">
+                        {tasks.length === 0
+                            ? "Crea tu primera tarea para comenzar a organizar tu trabajo"
+                            : !showCompleted
+                              ? "Todas las tareas están completadas"
+                              : "No hay tareas que coincidan con los filtros actuales"}
+                    </p>
+                    {tasks.length === 0 && (
+                        <button
+                            class="create-task-btn"
+                            onclick="showCreateTaskModal()"
+                            aria-label="Crear nueva tarea">
+                            ➕ Nueva tarea
+                        </button>
+                    )}
+                </div>
+            )
+        }
+    </div>
 
-  <!-- Indicador de carga (para estados dinámicos) -->
-  <link rel="stylesheet" href="/src/styles/components/TaskList.css" />
-  <div class="loading-state">
-    <div class="loading-spinner"></div>
-    <p class="loading-text">Cargando tareas...</p>
-  </div>
+    <!-- Indicador de carga (para estados dinámicos) -->
+    <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Cargando tareas...</p>
+    </div>
 </div>
 
 <style>
-  .task-list {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-  }
+    .task-list {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
 
-  /* Encabezado */
-  .task-list-header {
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid #e5e7eb;
-    background: #fafafa;
-  }
-
-  .header-main {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-
-  .list-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #1f2937;
-    margin: 0;
-  }
-
-  .task-stats {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-  }
-
-  .stat {
-    font-weight: 500;
-  }
-
-  .stat.pending {
-    color: #f59e0b;
-  }
-
-  .stat.completed {
-    color: #10b981;
-  }
-
-  .stat-divider {
-    color: #d1d5db;
-  }
-
-  .view-all {
-    text-align: right;
-  }
-
-  .view-all-link {
-    color: #0c5a34;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.2s ease;
-  }
-
-  .view-all-link:hover {
-    color: #064e3b;
-    text-decoration: underline;
-  }
-
-  /* Contenido */
-  .task-list-content {
-    padding: 16px 24px 24px;
-  }
-
-  .tasks-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0; /* Gap está en TaskItem */
-  }
-
-  /* Estado vacío */
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-  }
-
-  .empty-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-  }
-
-  .empty-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #4b5563;
-    margin: 0 0 8px 0;
-  }
-
-  .empty-description {
-    color: #6b7280;
-    font-size: 14px;
-    line-height: 1.5;
-    margin: 0 0 24px 0;
-    max-width: 300px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .create-task-btn {
-    background: #0c5a34;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .create-task-btn:hover {
-    background: #064e3b;
-  }
-
-  .create-task-btn:focus {
-    outline: 2px solid #0c5a34;
-    outline-offset: 2px;
-  }
-
-  /* Estado de carga */
-  .loading-state {
-    text-align: center;
-    padding: 40px 20px;
-  }
-
-  .loading-spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid #e5e7eb;
-    border-top: 3px solid #0c5a34;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 16px;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  .loading-text {
-    color: #6b7280;
-    font-size: 14px;
-    margin: 0;
-  }
-
-  /* Responsive */
-  @media (max-width: 640px) {
+    /* Encabezado */
     .task-list-header {
-      padding: 16px 16px 12px;
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #fafafa;
     }
 
     .header-main {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
-    .task-stats {
-      align-self: flex-end;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
     }
 
     .list-title {
-      font-size: 18px;
+        font-size: 20px;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
     }
 
+    .task-stats {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .stat {
+        font-weight: 500;
+    }
+
+    .stat.pending {
+        color: #f59e0b;
+    }
+
+    .stat.completed {
+        color: #10b981;
+    }
+
+    .stat-divider {
+        color: #d1d5db;
+    }
+
+    .view-all {
+        text-align: right;
+    }
+
+    .view-all-link {
+        color: #0c5a34;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .view-all-link:hover {
+        color: #064e3b;
+        text-decoration: underline;
+    }
+
+    /* Contenido */
     .task-list-content {
-      padding: 12px 16px 16px;
+        padding: 16px 24px 24px;
     }
 
+    .tasks-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0; /* Gap está en TaskItem */
+    }
+
+    /* Estado vacío */
     .empty-state {
-      padding: 32px 16px;
+        text-align: center;
+        padding: 40px 20px;
     }
 
     .empty-icon {
-      font-size: 40px;
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
     }
-  }
+
+    .empty-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #4b5563;
+        margin: 0 0 8px 0;
+    }
+
+    .empty-description {
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0 0 24px 0;
+        max-width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .create-task-btn {
+        background: #0c5a34;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .create-task-btn:hover {
+        background: #064e3b;
+    }
+
+    .create-task-btn:focus {
+        outline: 2px solid #0c5a34;
+        outline-offset: 2px;
+    }
+
+    /* Estado de carga */
+    .loading-state {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .loading-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #e5e7eb;
+        border-top: 3px solid #0c5a34;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading-text {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+        .task-list-header {
+            padding: 16px 16px 12px;
+        }
+
+        .header-main {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .task-stats {
+            align-self: flex-end;
+        }
+
+        .list-title {
+            font-size: 18px;
+        }
+
+        .task-list-content {
+            padding: 12px 16px 16px;
+        }
+
+        .empty-state {
+            padding: 32px 16px;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+        }
+    }
 </style>
 
 <script>
-  // Función global para mostrar el modal de crear tarea
-  declare global {
-    function showCreateTaskModal(): void;
-  }
+    // Función global para mostrar el modal de crear tarea
+    declare global {
+        function showCreateTaskModal(): void;
+    }
 
-  // Función para mostrar/ocultar estado de carga
-  window.toggleTaskListLoading = function(show: boolean): void {
-    const loadingElements = document.querySelectorAll('.loading-state');
-    const contentElements = document.querySelectorAll('.task-list-content');
-    
-    loadingElements.forEach(el => {
-      (el as HTMLElement).style.display = show ? 'block' : 'none';
-    });
-    
-    contentElements.forEach(el => {
-      (el as HTMLElement).style.display = show ? 'none' : 'block';
-    });
-  };
+    // Función para mostrar/ocultar estado de carga
+    window.toggleTaskListLoading = function (show: boolean): void {
+        const loadingElements = document.querySelectorAll(".loading-state");
+        const contentElements = document.querySelectorAll(".task-list-content");
+
+        loadingElements.forEach((el) => {
+            (el as HTMLElement).style.display = show ? "block" : "none";
+        });
+
+        contentElements.forEach((el) => {
+            (el as HTMLElement).style.display = show ? "none" : "block";
+        });
+    };
 </script>

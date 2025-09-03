@@ -1,16 +1,16 @@
 {
-  "name": "",
-  "type": "module",
-  "version": "0.0.1",
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "dependencies": {
-    "@astrojs/vercel": "^8.2.7",
-    "astro": "^5.13.4",
-    "nanostores": "^1.0.1"
-  }
+    "name": "TurifyTasks",
+    "type": "module",
+    "version": "0.0.1",
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro"
+    },
+    "dependencies": {
+        "@astrojs/vercel": "^8.2.7",
+        "astro": "^5.13.4",
+        "nanostores": "^1.0.1"
+    }
 }
