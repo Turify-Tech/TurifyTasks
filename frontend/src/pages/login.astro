@@ -285,6 +285,18 @@ const pageTitle = "Iniciar Sesión - TurifyTasks";
                         );
                     }
 
+                    // Guardar estado de autenticación en cache para evitar verificaciones inmediatas
+                    if (data.user) {
+                        window.authCache = {
+                            data: {
+                                authenticated: true,
+                                user: data.user,
+                            },
+                            timestamp: Date.now(),
+                        };
+                        window.currentUser = data.user;
+                    }
+
                     // Limpiar cualquier estado de redirección previo
                     window.isRedirecting = false;
 

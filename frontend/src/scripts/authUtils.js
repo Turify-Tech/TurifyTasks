@@ -8,8 +8,8 @@ export async function checkAuthStatus() {
         // Cache de autenticación para evitar verificaciones excesivas
         if (window.authCache && window.authCache.timestamp) {
             const cacheAge = Date.now() - window.authCache.timestamp;
-            // Usar cache si es menor a 3 segundos
-            if (cacheAge < 3000) {
+            // Usar cache si es menor a 10 segundos
+            if (cacheAge < 10000) {
                 console.log("[Auth] Usando cache de autenticación");
                 return window.authCache.data;
             }
@@ -180,6 +180,13 @@ export async function logout() {
 
 // Inicializar verificación de autenticación en cada página
 export function initializeAuth() {
+    // Solo ejecutar en páginas que no sean dashboard
+    const currentPath = window.location.pathname;
+    if (currentPath === "/dashboard" || currentPath === "/dashboard/") {
+        console.log("[Auth] En dashboard, saltando initializeAuth automático");
+        return;
+    }
+
     // Resetear estado de redirección al cargar la página
     window.isRedirecting = false;
 
@@ -199,4 +206,32 @@ export function initializeAuth() {
         window.lastAuthCheck = now;
         await handleAuthRedirect();
     });
+}
+
+// Función específica para verificar autenticación en dashboard sin redirecciones automáticas
+export async function checkAuthForDashboard() {
+    try {
+        console.log("[Auth] Verificando autenticación para dashboard...");
+        const authStatus = await checkAuthStatus();
+
+        if (!authStatus.authenticated) {
+            console.log("[Auth] No autenticado, redirigiendo a login...");
+            window.location.href = "/login";
+            return false;
+        }
+
+        // Guardar datos del usuario
+        window.currentUser = authStatus.user;
+        updateUserUIIfExists(authStatus.user);
+
+        console.log(
+            "[Auth] Usuario autenticado en dashboard:",
+            authStatus.user
+        );
+        return true;
+    } catch (error) {
+        console.error("[Auth] Error verificando autenticación:", error);
+        window.location.href = "/login";
+        return false;
+    }
 }

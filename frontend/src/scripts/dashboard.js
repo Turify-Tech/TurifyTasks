@@ -1,7 +1,7 @@
 // dashboard.js - Inicialización y orquestación de dashboard
 console.log("[dashboard.js] cargado");
-import { initializeAuth, checkAuthStatus } from "./authUtils.js";
-import { checkAuthentication, updateUserUI, logout } from "./auth.js";
+import { checkAuthForDashboard } from "./authUtils.js";
+import { updateUserUI, logout } from "./auth.js";
 import {
     loadTasks,
     updateTaskCounts,
@@ -82,9 +82,6 @@ window.closeTaskForm = function () {
     }
 };
 
-// Inicializar verificación de autenticación automática
-initializeAuth();
-
 // Inicialización
 window.addEventListener("DOMContentLoaded", async () => {
     console.log("[dashboard.js] DOM cargado, iniciando...");
@@ -92,9 +89,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Suscribirse a los stores ANTES de cargar datos
     setupStoreSubscriptions();
 
-    // Verificar autenticación una sola vez antes de cargar tareas
-    const authStatus = await checkAuthentication();
-    if (authStatus) {
+    // Verificar autenticación específicamente para dashboard
+    const isAuthenticated = await checkAuthForDashboard();
+    if (isAuthenticated) {
         // Solo cargar tareas si la autenticación fue exitosa
         console.log("[dashboard.js] Autenticación exitosa, cargando tareas...");
         loadTasks();
