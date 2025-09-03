@@ -1,5 +1,6 @@
 ---
 import MetaTags from "../components/MetaTags.astro";
+import "../scripts/authUtils.js";
 
 const pageTitle = "TurifyTasks - Gestión de Tareas";
 const pageDescription =
@@ -24,10 +25,3 @@ const pageDescription =
     </head>
     <body> </body>
 </html>
-
-<script>
-    import { handleAuthRedirect } from "../scripts/authUtils.js";
-
-    // Verificar autenticación y redirigir apropiadamente
-    handleAuthRedirect();
-</script>

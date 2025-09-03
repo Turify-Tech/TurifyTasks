@@ -1,358 +1,385 @@
 ---
 // TaskItem.astro - Componente individual de tarea
-import DueDateInfo from './DueDateInfo.astro';
-import { truncateText, TEXT_LIMITS } from '../utils/textUtils';
+import DueDateInfo from "./DueDateInfo.astro";
+import { truncateText, TEXT_LIMITS } from "../utils/textUtils";
+import "../styles/components/TaskItem.css";
 
 export interface Props {
-  task: {
-    id: number;
-    title: string;
-    description?: string;
-    due_date?: string;
-    priority: 'baja' | 'media' | 'alta';
-    completed: boolean;
-    list_name?: string;
-    created_at: string;
-    updated_at: string;
-  };
-  onToggleComplete?: (taskId: number, completed: boolean) => void;
-  onEdit?: (taskId: number) => void;
-  onDelete?: (taskId: number) => void;
+    task: {
+        id: number;
+        title: string;
+        description?: string;
+        due_date?: string;
+        priority: "baja" | "media" | "alta";
+        completed: boolean;
+        list_name?: string;
+        created_at: string;
+        updated_at: string;
+    };
+    onToggleComplete?: (taskId: number, completed: boolean) => void;
+    onEdit?: (taskId: number) => void;
+    onDelete?: (taskId: number) => void;
 }
 
 const { task } = Astro.props;
 
 // Función para formatear fechas
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('es-ES', { 
-    day: '2-digit', 
-    month: '2-digit', 
-    year: 'numeric' 
-  });
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    });
 };
 
 // Función para determinar el color de la prioridad
 const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'alta': return '#ef4444';
-    case 'media': return '#f59e0b';
-    case 'baja': return '#10b981';
-    default: return '#6b7280';
-  }
+    switch (priority) {
+        case "alta":
+            return "#ef4444";
+        case "media":
+            return "#f59e0b";
+        case "baja":
+            return "#10b981";
+        default:
+            return "#6b7280";
+    }
 };
 ---
 
 <div class="task-item" data-task-id={task.id} data-completed={task.completed}>
-  <div class="task-main">
-    <!-- Checkbox para completar/incompletar -->
-    <label class="task-checkbox">
-      <input 
-        type="checkbox" 
-        checked={task.completed}
-        onchange={`handleToggleComplete(${task.id}, this.checked)`}
-        aria-label={`Marcar como ${task.completed ? 'incompleta' : 'completada'} la tarea: ${task.title}`}
-      />
-      <span class="checkmark"></span>
-    </label>
+    <div class="task-main">
+        <!-- Checkbox para completar/incompletar -->
+        <label class="task-checkbox">
+            <input
+                type="checkbox"
+                checked={task.completed}
+                onchange={`handleToggleComplete(${task.id}, this.checked)`}
+                aria-label={`Marcar como ${task.completed ? "incompleta" : "completada"} la tarea: ${task.title}`}
+            />
+            <span class="checkmark"></span>
+        </label>
 
-    <!-- Contenido principal de la tarea -->
-    <div class="task-content">
-      <div class="task-header">
-        <h3 class="task-title" class:list={[task.completed && 'completed']}>
-          <span class="task-title-full">{task.title}</span>
-          <span class="task-title-truncated">{truncateText(task.title, TEXT_LIMITS.TRUNCATE_LENGTH)}</span>
-        </h3>
-        <div class="task-meta">
-          <span 
-            class="priority-badge" 
-            style={`background-color: ${getPriorityColor(task.priority)}`}
-            aria-label={`Prioridad ${task.priority}`}
-          >
-            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-          </span>
+        <!-- Contenido principal de la tarea -->
+        <div class="task-content">
+            <div class="task-header">
+                <h3
+                    class="task-title"
+                    class:list={[task.completed && "completed"]}>
+                    <span class="task-title-full">{task.title}</span>
+                    <span class="task-title-truncated"
+                        >{
+                            truncateText(
+                                task.title,
+                                TEXT_LIMITS.TRUNCATE_LENGTH
+                            )
+                        }</span
+                    >
+                </h3>
+                <div class="task-meta">
+                    <span
+                        class="priority-badge"
+                        style={`background-color: ${getPriorityColor(task.priority)}`}
+                        aria-label={`Prioridad ${task.priority}`}>
+                        {
+                            task.priority.charAt(0).toUpperCase() +
+                                task.priority.slice(1)
+                        }
+                    </span>
+                </div>
+            </div>
+
+            {
+                task.description && (
+                    <p
+                        class="task-description"
+                        class:list={[task.completed && "completed"]}>
+                        <span class="task-desc-full">{task.description}</span>
+                        <span class="task-desc-truncated">
+                            {truncateText(
+                                task.description,
+                                TEXT_LIMITS.TRUNCATE_LENGTH
+                            )}
+                        </span>
+                    </p>
+                )
+            }
+
+            <!-- Información de fecha límite -->
+            {
+                task.due_date && (
+                    <DueDateInfo
+                        dueDate={task.due_date}
+                        showTimeRemaining={true}
+                        compact={false}
+                    />
+                )
+            }
+
+            <div class="task-footer">
+                {
+                    task.list_name && (
+                        <span class="list-name">📁 {task.list_name}</span>
+                    )
+                }
+                <span class="created-date">
+                    Creada: {formatDate(task.created_at)}
+                </span>
+            </div>
         </div>
-      </div>
-
-      {task.description && (
-        <p class="task-description" class:list={[task.completed && 'completed']}>
-          <span class="task-desc-full">{task.description}</span>
-          <span class="task-desc-truncated">{truncateText(task.description, TEXT_LIMITS.TRUNCATE_LENGTH)}</span>
-        </p>
-      )}
-
-      <!-- Información de fecha límite -->
-      {task.due_date && (
-        <DueDateInfo 
-          dueDate={task.due_date} 
-          showTimeRemaining={true}
-          compact={false}
-        />
-      )}
-
-      <div class="task-footer">
-        {task.list_name && (
-          <span class="list-name">📁 {task.list_name}</span>
-        )}
-        <span class="created-date">
-          Creada: {formatDate(task.created_at)}
-        </span>
-      </div>
     </div>
-  </div>
 
-  <!-- Botones de acción -->
-  <div class="task-actions">
-    <button 
-      class="action-btn edit-btn" 
-      onclick={`handleEdit(${task.id})`}
-      aria-label={`Editar tarea: ${task.title}`}
-      title="Editar tarea"
-    >
-      ✏️
-    </button>
-    <button 
-      class="action-btn delete-btn js-delete-task" 
-      data-task-id={task.id}
-      aria-label={`Eliminar tarea: ${task.title}`}
-      title="Eliminar tarea"
-    >
-      🗑️
-    </button>
-  </div>
+    <!-- Botones de acción -->
+    <div class="task-actions">
+        <button
+            class="action-btn edit-btn"
+            onclick={`handleEdit(${task.id})`}
+            aria-label={`Editar tarea: ${task.title}`}
+            title="Editar tarea">
+            ✏️
+        </button>
+        <button
+            class="action-btn delete-btn js-delete-task"
+            data-task-id={task.id}
+            aria-label={`Eliminar tarea: ${task.title}`}
+            title="Eliminar tarea">
+            🗑️
+        </button>
+    </div>
 </div>
 
 <style>
-  .task-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 16px;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
-    margin-bottom: 12px;
-  }
-
-  .task-item:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-color: #d1d5db;
-  }
-
-  .task-item[data-completed="true"] {
-    opacity: 0.7;
-    background-color: #f9fafb;
-  }
-
-  .task-main {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    flex: 1;
-  }
-
-  /* Checkbox personalizado */
-  .task-checkbox {
-    position: relative;
-    cursor: pointer;
-    margin-top: 2px;
-  }
-
-  .task-checkbox input {
-    opacity: 0;
-    position: absolute;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-
-  .checkmark {
-    height: 20px;
-    width: 20px;
-    background-color: #fff;
-    border: 2px solid #d1d5db;
-    border-radius: 4px;
-    display: inline-block;
-    position: relative;
-    transition: all 0.2s ease;
-  }
-
-  .task-checkbox:hover .checkmark {
-    border-color: #0c5a34;
-  }
-
-  .task-checkbox input:checked + .checkmark {
-    background-color: #0c5a34;
-    border-color: #0c5a34;
-  }
-
-  .task-checkbox input:checked + .checkmark:after {
-    content: "✓";
-    position: absolute;
-    top: -2px;
-    left: 3px;
-    color: white;
-    font-size: 14px;
-    font-weight: bold;
-  }
-
-  /* Contenido de la tarea */
-  .task-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .task-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 8px;
-    gap: 12px;
-  }
-
-  .task-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1f2937;
-    margin: 0;
-    line-height: 1.4;
-    word-break: break-word;
-  }
-
-  .task-title.completed {
-    text-decoration: line-through;
-    color: #6b7280;
-  }
-
-  .task-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .priority-badge {
-    font-size: 11px;
-    font-weight: 600;
-    color: white;
-    padding: 4px 8px;
-    border-radius: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .due-date {
-    font-size: 12px;
-    color: #6b7280;
-    white-space: nowrap;
-  }
-
-  .task-description {
-    font-size: 14px;
-    color: #4b5563;
-    line-height: 1.5;
-    margin: 0 0 12px 0;
-    word-break: break-word;
-  }
-
-  .task-description.completed {
-    color: #9ca3af;
-  }
-
-  .task-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    color: #6b7280;
-    margin-top: 8px;
-    gap: 12px;
-  }
-
-  .list-name {
-    background-color: #f3f4f6;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: 500;
-  }
-
-  .created-date {
-    white-space: nowrap;
-  }
-
-  /* Botones de acción */
-  .task-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  .task-item:hover .task-actions {
-    opacity: 1;
-  }
-
-  .action-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 4px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-    line-height: 1;
-  }
-
-  .edit-btn:hover {
-    background-color: #dbeafe;
-  }
-
-  .delete-btn:hover {
-    background-color: #fee2e2;
-  }
-
-  .action-btn:focus {
-    outline: 2px solid #0c5a34;
-    outline-offset: 2px;
-  }
-
-  /* Responsive */
-  @media (max-width: 640px) {
     .task-item {
-      padding: 12px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+        margin-bottom: 12px;
+    }
+
+    .task-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-color: #d1d5db;
+    }
+
+    .task-item[data-completed="true"] {
+        opacity: 0.7;
+        background-color: #f9fafb;
+    }
+
+    .task-main {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        flex: 1;
+    }
+
+    /* Checkbox personalizado */
+    .task-checkbox {
+        position: relative;
+        cursor: pointer;
+        margin-top: 2px;
+    }
+
+    .task-checkbox input {
+        opacity: 0;
+        position: absolute;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+    .checkmark {
+        height: 20px;
+        width: 20px;
+        background-color: #fff;
+        border: 2px solid #d1d5db;
+        border-radius: 4px;
+        display: inline-block;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+
+    .task-checkbox:hover .checkmark {
+        border-color: #0c5a34;
+    }
+
+    .task-checkbox input:checked + .checkmark {
+        background-color: #0c5a34;
+        border-color: #0c5a34;
+    }
+
+    .task-checkbox input:checked + .checkmark:after {
+        content: "✓";
+        position: absolute;
+        top: -2px;
+        left: 3px;
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    /* Contenido de la tarea */
+    .task-content {
+        flex: 1;
+        min-width: 0;
     }
 
     .task-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+        gap: 12px;
+    }
+
+    .task-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+
+    .task-title.completed {
+        text-decoration: line-through;
+        color: #6b7280;
     }
 
     .task-meta {
-      align-self: flex-end;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .priority-badge {
+        font-size: 11px;
+        font-weight: 600;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .due-date {
+        font-size: 12px;
+        color: #6b7280;
+        white-space: nowrap;
+    }
+
+    .task-description {
+        font-size: 14px;
+        color: #4b5563;
+        line-height: 1.5;
+        margin: 0 0 12px 0;
+        word-break: break-word;
+    }
+
+    .task-description.completed {
+        color: #9ca3af;
     }
 
     .task-footer {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 8px;
+        gap: 12px;
     }
 
-    .task-actions {
-      flex-direction: row;
-      opacity: 1; /* Siempre visibles en móvil */
+    .list-name {
+        background-color: #f3f4f6;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 500;
     }
-  }
+
+    .created-date {
+        white-space: nowrap;
+    }
+
+    /* Botones de acción */
+    .task-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .task-item:hover .task-actions {
+        opacity: 1;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+        line-height: 1;
+    }
+
+    .edit-btn:hover {
+        background-color: #dbeafe;
+    }
+
+    .delete-btn:hover {
+        background-color: #fee2e2;
+    }
+
+    .action-btn:focus {
+        outline: 2px solid #0c5a34;
+        outline-offset: 2px;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+        .task-item {
+            padding: 12px;
+        }
+
+        .task-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .task-meta {
+            align-self: flex-end;
+        }
+
+        .task-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .task-actions {
+            flex-direction: row;
+            opacity: 1; /* Siempre visibles en móvil */
+        }
+    }
 </style>
 
 <script>
-  // Funciones globales para manejar eventos (se definirán en el dashboard)
-  declare global {
-    function handleToggleComplete(taskId: number, completed: boolean): void;
-    function handleEdit(taskId: number): void;
-    function handleDelete(taskId: number): void;
-  }
+    // Funciones globales para manejar eventos (se definirán en el dashboard)
+    declare global {
+        function handleToggleComplete(taskId: number, completed: boolean): void;
+        function handleEdit(taskId: number): void;
+        function handleDelete(taskId: number): void;
+    }
 </script>

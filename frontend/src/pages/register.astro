@@ -1,6 +1,8 @@
 ---
 // register.astro
 import MetaTags from "../components/MetaTags.astro";
+import "../styles/register.css";
+import "../scripts/authUtils.js";
 
 const pageTitle = "Registro - TurifyTasks";
 const pageDescription =
@@ -14,7 +16,6 @@ const pageDescription =
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
         <title>{pageTitle}</title>
-        <link rel="stylesheet" href="/src/styles/register.css" />
 
         <MetaTags
             title={pageTitle}
@@ -148,10 +149,3 @@ const pageDescription =
         </div>
     </body>
 </html>
-
-<script>
-    import { initializeAuth } from "../scripts/authUtils.js";
-
-    // Inicializar verificación de autenticación
-    initializeAuth();
-</script>

@@ -1,6 +1,9 @@
 ---
 // login.astro
 import MetaTags from "../components/MetaTags.astro";
+import "../styles/login.css";
+import "../scripts/authUtils.js";
+import "../config/api.js";
 
 const pageTitle = "Iniciar Sesión - TurifyTasks";
 const pageDescription =
@@ -14,7 +17,6 @@ const pageDescription =
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
         <title>{pageTitle}</title>
-        <link rel="stylesheet" href="/src/styles/login.css" />
 
         <MetaTags
             title={pageTitle}
@@ -133,9 +135,6 @@ const pageDescription =
 </html>
 
 <script>
-    import { initializeAuth } from "../scripts/authUtils.js";
-    import { apiRequest, API_CONFIG } from "../config/api.js";
-
     // Función para mostrar/ocultar error de campo
     function showFieldError(fieldId, message) {
         const errorDiv = document.getElementById(fieldId + "Error");
