@@ -1,7 +1,7 @@
 // Configuración centralizada de la API
 export const API_CONFIG = {
     // Toma la URL base desde la variable de entorno o usa localhost como fallback
-    BASE_URL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+    BASE_URL: "https://turify-tasks-backend.vercel.app",
 
     // Endpoints de la API
     ENDPOINTS: {
