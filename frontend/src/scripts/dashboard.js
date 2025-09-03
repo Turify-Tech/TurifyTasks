@@ -92,8 +92,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // Suscribirse a los stores ANTES de cargar datos
     setupStoreSubscriptions();
 
-    console.log("[dashboard.js] Llamando a checkAuthentication...");
-    checkAuthentication();
+    // Solo cargar tareas - la autenticación ya se maneja en initializeAuth()
     console.log("[dashboard.js] Llamando a loadTasks...");
     loadTasks();
 

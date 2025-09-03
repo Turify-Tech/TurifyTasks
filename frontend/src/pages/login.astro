@@ -273,11 +273,15 @@ const pageTitle = "Iniciar Sesión - TurifyTasks";
                         successMessage.style.display = "block";
                     }
 
+                    // Limpiar cualquier estado de redirección previo
+                    window.isRedirecting = false;
+
                     // Limpiar cualquier token viejo que pueda existir
                     localStorage.removeItem("authToken");
 
                     // Redirigir después de 1 segundo
                     setTimeout(() => {
+                        window.isRedirecting = true;
                         window.location.href = "/dashboard";
                     }, 1000);
                 } else {

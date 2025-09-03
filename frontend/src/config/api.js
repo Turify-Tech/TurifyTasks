@@ -1,7 +1,7 @@
 // Configuración centralizada de la API
 export const API_CONFIG = {
-    // Toma la URL base desde la variable de entorno o usa localhost como fallback
-    BASE_URL: "https://turify-tasks-backend.vercel.app",
+    // Usar localhost en desarrollo y Vercel en producción
+    BASE_URL: "https://turify-tasks-backend.vercel.app/",
 
     // Endpoints de la API
     ENDPOINTS: {
@@ -21,6 +21,14 @@ export const API_CONFIG = {
     },
 };
 
+// Log de configuración para debugging
+console.log("[API Config] BASE_URL:", API_CONFIG.BASE_URL);
+console.log("[API Config] VITE_API_URL env:", import.meta.env.VITE_API_URL);
+console.log(
+    "[API Config] Current domain:",
+    typeof window !== "undefined" ? window.location.origin : "SSR"
+);
+
 // Función helper para construir URLs completas
 export function buildApiUrl(endpoint) {
     return `${API_CONFIG.BASE_URL}${endpoint}`;
@@ -36,6 +44,9 @@ export async function apiRequest(endpoint, options = {}) {
             ...options.headers,
         },
     };
+
+    console.log("[API Request] URL:", url);
+    console.log("[API Request] Options:", { ...defaultOptions, ...options });
 
     return fetch(url, { ...defaultOptions, ...options });
 }
